@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link href="https://fonts.googleapis.com/css?family=Muli|Source+Sans+Pro&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <title>Weather Dashboard</title>
+  </head>
+  <body>
+    <header>
+      <h1>Weather Dashboard</h1>
+    </header>
+
+    <div class="container">
+      <div class="search">
+        <!-- form to search for cities -->
+        <form action="" id="search-form">
+          <label for="city-input">Search for a City:</label>
+          <input type="text" id="city-input" />
+          <input type="submit" id="submit-form" />
+        </form>
+        <div class="tip">***For Best results:</div>
+        <div class="tip">Enter zip code (10107) or</div>
+        <div class="tip">Enter city,country (London,En) or</div>
+        <div class="tip last-tip">Enter city,state,country ( dublin,oh,us )</div>
+        <!-- shows the past cities inputted -->
+        <div class="searched-cities">example</div>
+        <div class="searched-cities">example</div>
+      </div>
+
+      <div class="display">
+        <!-- current weather -->
+        <div class="current-weather">
+          <h2 id="current-place"></h2>
+          <p>Temperature: <span id="temp"></span></p>
+          <p>Humidity: <span id="humidity"></span></p>
+          <p>Wind Speed: <span id="wind"></span></p>
+          <p id="uv">UV Index: <span id="uv-range"></span></p>
+        </div>
+        <!-- five day forecast -->
+
+        <!-- hold boxes that show date, temp, humidity, precipation if there -->
+        <div class="five-day">
+          <div class="item">example</div>
+          <div class="item">example</div>
+          <div class="item">example</div>
+          <div class="item">example</div>
+          <div class="item">example</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="assets/js/app.js"></script>
+  </body>
+</html>
