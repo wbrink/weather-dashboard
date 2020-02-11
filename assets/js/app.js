@@ -69,7 +69,7 @@ function search(e) {
 
     var searchedCity = $("<div>").text(searchLocation).addClass("searched-cities");
     $(".search").append(searchedCity);
-
+    
     // append to local storage
     cities.push(searchLocation);
     localStorage.setItem("searchedCities", JSON.stringify(cities));
