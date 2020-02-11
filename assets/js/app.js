@@ -181,7 +181,7 @@ function getForecast(url) {
 
     for (var i = 0; i < res.list.length; i++) {
       localTime = res.list[i].dt; 
-      localTime = new Date(localTime * 1000); // converts to local time
+      localTime = new Date(localTime * 1000); // converts to local time of browser
       
       // tomorrow
       if (localTime >= tomorrow  && localTime < secondDay ) {
