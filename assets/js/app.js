@@ -23,14 +23,26 @@ setDate();
 // when form is submitted
 form.on("submit", search);
 
-function search(e) {
+function search(e, location="") {
   e.preventDefault();
 
+  
   // if city is in there
   if (city.val()) {
     searchLocation = city.val();
-    var curWeatherURL = "https://api.openweathermap.org/data/2.5/weather?q=" + searchLocation + "&units=imperial&appid=ea61de219a59abe630bd0cdab605c61a";
-    var forecastURL = "https://api.openweathermap.org/data/2.5/forecast?q=" + searchLocation + "&appid=ea61de219a59abe630bd0cdab605c61a&units=imperial"
+    if (searchLocation.indexOf(",") == -1) {
+      var curWeatherURL = "https://api.openweathermap.org/data/2.5/weather?q=" + searchLocation + "&units=imperial&appid=ea61de219a59abe630bd0cdab605c61a";
+      var forecastURL = "https://api.openweathermap.org/data/2.5/forecast?q=" + searchLocation + "&appid=ea61de219a59abe630bd0cdab605c61a&units=imperial";
+    } else {
+      searchLocation = city.val().split(",");
+      for (var i = 0; i<searchLocation.length; i++) {
+        searchLocation[i] = searchLocation[i].trim();
+      }
+      searchLocation = searchLocation.join(",");
+      var curWeatherURL = "https://api.openweathermap.org/data/2.5/weather?q=" + searchLocation + "&units=imperial&appid=ea61de219a59abe630bd0cdab605c61a";
+      var forecastURL = "https://api.openweathermap.org/data/2.5/forecast?q=" + searchLocation + "&appid=ea61de219a59abe630bd0cdab605c61a&units=imperial";
+    }
+    
 
     // use regex to determine zip code or city,state,country  
     if (searchLocation.match(zipRegex)) {
@@ -38,12 +50,13 @@ function search(e) {
       curWeatherURL = "https://api.openweathermap.org/data/2.5/weather?zip=" + searchLocation + "&appid=ea61de219a59abe630bd0cdab605c61a&units=imperial";
       var forecastURL = "https://api.openweathermap.org/data/2.5/forecast?zip=" + searchLocation + "&appid=ea61de219a59abe630bd0cdab605c61a&units=imperial"
     } 
-    
-  getCurrentWeather(curWeatherURL);
-  getForecast(forecastURL);
+
+    var searchedCity = $("<div>").text(searchLocation).addClass("searched-cities");
+    $(".search").append(searchedCity);
+
+    getCurrentWeather(curWeatherURL);
+    getForecast(forecastURL);
   
-
-
   }
   else {
     alert("Please Input Proper Location");
@@ -66,7 +79,8 @@ function getCurrentWeather(url) {
     curTemp.text(`${res.main.temp} F`);
     curHumidity.text(`${res.main.humidity}%`);
     curWind.text(`${res.wind.speed} MPH`)
-    
+    url = "http://openweathermap.org/img/wn/" + res.weather[0].icon + "@2x.png";
+    $("#currentIcon").attr("src", url);
     
     // get uv index
     $.ajax({
@@ -103,19 +117,19 @@ function getForecast(url) {
   })
   .then(function(res) {
 
-    // need to account for UTC Time
-    //var shiftSeconds = res.city.timezone;
-    
-    var clear1 = 0;
+    // variables for each forecast day    
+    var clear1 = 0; // # of clear descriptions on first day etc.
     var clouds1 = 0;
     var rain1 = 0;
-    var snow1 = 0
-    var temps1 = [];
-    var humidities1 = [];
+    var snow1 = 0;
+    var thunderstorm1 = 0;
+    var temps1 = []; // all the temps for given day
+    var humidities1 = []; // all the humidities for the given day
 
     var clear2 = 0;
     var clouds2 = 0;
     var rain2 = 0;
+    var thunderstorm2 = 0;
     var snow2 = 0;
     var temps2 = [];
     var humidities2 = [];
@@ -123,6 +137,7 @@ function getForecast(url) {
     var clear3 = 0;
     var clouds3 = 0;
     var rain3 = 0;
+    var thunderstorm3 = 0;
     var snow3 = 0;
     var temps3 = [];
     var humidities3 = [];
@@ -130,14 +145,15 @@ function getForecast(url) {
     var clear4 = 0;
     var clouds4 = 0;
     var rain4 = 0;
+    var thunderstorm4 = 0;
     var snow4 = 0;
-    var tempHigh5 = 0;
     var temps4 = [];
     var humidities4 = [];
 
     var clear5 = 0;
     var clouds5 = 0;
     var rain5 = 0;
+    var thunderstorm5 = 0;
     var snow5 = 0;
     var temps5 = [];
     var humidities5 = [];
@@ -149,14 +165,16 @@ function getForecast(url) {
       
       // tomorrow
       if (localTime >= tomorrow  && localTime < secondDay ) {
-        if (res.list[i].weather.main === "Clear") {
+        if (res.list[i].weather[0].main === "Clear") {
           clear1++;
-        } else if (res.list[i].weather.main === "Clouds") {
+        } else if (res.list[i].weather[0].main === "Clouds") {
           clouds1++;
-        } else if (res.list[i].weather.main === "Rain") {
+        } else if (res.list[i].weather[0].main === "Rain") {
           rain1++; 
+        } else if (res.list[i].weather[0].main === "Thunderstorm") {
+          thunderstorm1++; 
         }
-        else if (res.list[i].weather.main === "Snow") {
+        else if (res.list[i].weather[0].main === "Snow") {
           snow1++; 
         }
         temps1.push(res.list[i].main.temp)
@@ -165,15 +183,17 @@ function getForecast(url) {
       }
       // secondDay
       else if (localTime >= secondDay  && localTime < thirdDay) {
-        if (res.list[i].weather.main === "Clear") {
-          clear1++;
-        } else if (res.list[i].weather.main === "Clouds") {
-          clouds1++;
-        } else if (res.list[i].weather.main === "Rain") {
-          rain1++; 
+        if (res.list[i].weather[0].main === "Clear") {
+          clear2++;
+        } else if (res.list[i].weather[0].main === "Clouds") {
+          clouds2++;
+        } else if (res.list[i].weather[0].main === "Rain") {
+          rain2++; 
+        } else if (res.list[i].weather[0].main === "Thunderstorm") {
+          thunderstorm2++; 
         }
-        else if (res.list[i].weather.main === "Snow") {
-          snow1++; 
+        else if (res.list[i].weather[0].main === "Snow") {
+          snow2++; 
         }
 
         temps2.push(res.list[i].main.temp)
@@ -181,15 +201,17 @@ function getForecast(url) {
       }
       // third
       else if (localTime >= thirdDay  && localTime < fourthDay) {
-        if (res.list[i].weather.main === "Clear") {
-          clear1++;
-        } else if (res.list[i].weather.main === "Clouds") {
-          clouds1++;
-        } else if (res.list[i].weather.main === "Rain") {
-          rain1++; 
+        if (res.list[i].weather[0].main === "Clear") {
+          clear3++;
+        } else if (res.list[i].weather[0].main === "Clouds") {
+          clouds3++;
+        } else if (res.list[i].weather[0].main === "Rain") {
+          rain3++; 
+        } else if (res.list[i].weather[0].main === "Thunderstorm") {
+          thunderstorm3++; 
         }
-        else if (res.list[i].weather.main === "Snow") {
-          snow1++; 
+        else if (res.list[i].weather[0].main === "Snow") {
+          snow3++; 
         }
 
         temps3.push(res.list[i].main.temp)
@@ -197,15 +219,17 @@ function getForecast(url) {
       }
       // fourth
       else if (localTime >= fourthDay  && localTime < fifthDay) {
-        if (res.list[i].weather.main === "Clear") {
-          clear1++;
-        } else if (res.list[i].weather.main === "Clouds") {
-          clouds1++;
-        } else if (res.list[i].weather.main === "Rain") {
-          rain1++; 
+        if (res.list[i].weather[0].main === "Clear") {
+          clear4++;
+        } else if (res.list[i].weather[0].main === "Clouds") {
+          clouds4++;
+        } else if (res.list[i].weather[0].main === "Rain") {
+          rain4++; 
+        } else if (res.list[i].weather[0].main === "Thunderstorm") {
+          thunderstorm4++; 
         }
-        else if (res.list[i].weather.main === "Snow") {
-          snow1++; 
+        else if (res.list[i].weather[0].main === "Snow") {
+          snow4++; 
         }
 
         temps4.push(res.list[i].main.temp)
@@ -213,15 +237,17 @@ function getForecast(url) {
       }
       // fifth
       else if (localTime >= fifthDay) {
-        if (res.list[i].weather.main === "Clear") {
-          clear1++;
-        } else if (res.list[i].weather.main === "Clouds") {
-          clouds1++;
-        } else if (res.list[i].weather.main === "Rain") {
-          rain1++; 
+        if (res.list[i].weather[0].main === "Clear") {
+          clear5++;
+        } else if (res.list[i].weather[0].main === "Clouds") {
+          clouds5++;
+        } else if (res.list[i].weather[0].main === "Rain") {
+          rain5++; 
+        } else if (res.list[i].weather[0].main === "Thunderstorm") {
+          thunderstorm5++; 
         }
-        else if (res.list[i].weather.main === "Snow") {
-          snow1++; 
+        else if (res.list[i].weather[0].main === "Snow") {
+          snow5++; 
         }
 
         temps5.push(res.list[i].main.temp)
@@ -230,6 +256,7 @@ function getForecast(url) {
       }
     } // end for
   
+    console.log(clear1);
     // sort arrays
     $(".highTemp1").text(`${temps1.sort(function(a,b) {return b-a})[0]} F`);
     $(".lowTemp1").text(`${temps1.sort()[0]} F`);
@@ -252,7 +279,13 @@ function getForecast(url) {
     $(".lowTemp5").text(`${temps5.sort()[0]} F`);
     $(".humidity5").text(`${humidities5.sort()[humidities5.length-1]}`);
 
-    // function for figuring out which icon will be present
+    
+    weatherIcon(clear1, clouds1, rain1, snow1, thunderstorm1, $(".icon1"));
+    weatherIcon(clear2, clouds2, rain2, snow2, thunderstorm2, $(".icon2"));
+    weatherIcon(clear3, clouds3, rain3, snow3, thunderstorm3, $(".icon3"));
+    weatherIcon(clear4, clouds4, rain4, snow4, thunderstorm4, $(".icon4"));
+    weatherIcon(clear5, clouds5, rain5, snow5, thunderstorm5, $(".icon5"));
+    
 
     
   });
@@ -287,7 +320,31 @@ function setDate() {
 }
 
 // function used to figure out which icon will be used for the forecast days
-function weatherIcon() {
-  
+function weatherIcon(clear, cloudy, rain, snow, thunderstorm, element) {
+  element.empty();
+  var ext = "";
+  if (snow) {
+    ext = "13d@2x.png";
+  } else if (thunderstorm) {
+    ext = "11d@2x.png";
+  } else if(rain) {
+    ext = "09d@2x.png";
+  } else if (cloudy > clear) {
+    ext = "03d@2x.png"; 
+  } else if(clear > 2 && cloudy > 2) {
+    ext = "02d@2x.png";
+  } else {
+    ext = "01d@2x.png";
+  }
 
+  element.append(
+    $("<img>").attr({src: `http://openweathermap.org/img/wn/${ext}`, width: "50px"})
+  );  
+
+}
+
+$(".searched-cities").on("click", searchPastChoice);
+
+function searchPastChoice(e) {
+  $(this).text
 }

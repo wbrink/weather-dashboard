@@ -65,6 +65,7 @@ header {
   margin-bottom: 10px;
   padding: 3px;
   font-size: 1rem;
+  cursor: pointer;
 }
 
 .display {
@@ -76,7 +77,6 @@ header {
 
 h2 {
   font-size: 1.5rem;
-  margin-bottom: 15px;
 }
 
 #uv-range {
@@ -112,6 +112,12 @@ h2 {
   padding: 5px;
   margin-bottom: 20px;
   margin-right: 15px;
+}
+
+.city-icon {
+  display: flex;
+  align-items: center;
+  height: 75px;
 }
 
 #submit-form {
