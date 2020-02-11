@@ -17,16 +17,32 @@ var thirdDay;
 var fourthDay;
 var fifthDay;
 
+var cities = JSON.parse(localStorage.getItem("searchedCities"));
+
+if (!cities) {
+  cities = [];
+} else {
+  loadCities();
+}
+
+
+
+function loadCities() {
+  for (var i = 0; i<cities.length; i++) {
+    var x = $("<div>").text(cities[i]).addClass("searched-cities");
+    $(".search").append(x);
+  }
+}
+
 // fills in the next 5 days
 setDate();
 
 // when form is submitted
 form.on("submit", search);
 
-function search(e, location="") {
+function search(e) {
   e.preventDefault();
 
-  
   // if city is in there
   if (city.val()) {
     searchLocation = city.val();
@@ -53,6 +69,10 @@ function search(e, location="") {
 
     var searchedCity = $("<div>").text(searchLocation).addClass("searched-cities");
     $(".search").append(searchedCity);
+
+    // append to local storage
+    cities.push(searchLocation);
+    localStorage.setItem("searchedCities", JSON.stringify(cities));
 
     getCurrentWeather(curWeatherURL);
     getForecast(forecastURL);
@@ -160,7 +180,7 @@ function getForecast(url) {
 
 
     for (var i = 0; i < res.list.length; i++) {
-      localTime = res.list[i].dt;
+      localTime = res.list[i].dt; 
       localTime = new Date(localTime * 1000); // converts to local time
       
       // tomorrow
@@ -256,7 +276,6 @@ function getForecast(url) {
       }
     } // end for
   
-    console.log(clear1);
     // sort arrays
     $(".highTemp1").text(`${temps1.sort(function(a,b) {return b-a})[0]} F`);
     $(".lowTemp1").text(`${temps1.sort()[0]} F`);
@@ -343,8 +362,24 @@ function weatherIcon(clear, cloudy, rain, snow, thunderstorm, element) {
 
 }
 
-$(".searched-cities").on("click", searchPastChoice);
+
+$(document).on("click", ".searched-cities", searchPastChoice);
 
 function searchPastChoice(e) {
-  $(this).text
+  
+  var searchLocation = $(this).text();
+  
+  var curWeatherURL;
+  var forecastURL;
+
+  if (!searchLocation.match(zipRegex)) {
+    curWeatherURL = "https://api.openweathermap.org/data/2.5/weather?q=" + searchLocation + "&units=imperial&appid=ea61de219a59abe630bd0cdab605c61a";
+    forecastURL = "https://api.openweathermap.org/data/2.5/forecast?q=" + searchLocation + "&appid=ea61de219a59abe630bd0cdab605c61a&units=imperial";
+  } else if (searchLocation.match(zipRegex)) {
+    curWeatherURL = "https://api.openweathermap.org/data/2.5/weather?zip=" + searchLocation + "&appid=ea61de219a59abe630bd0cdab605c61a&units=imperial";
+    forecastURL = "https://api.openweathermap.org/data/2.5/forecast?zip=" + searchLocation + "&appid=ea61de219a59abe630bd0cdab605c61a&units=imperial"
+  }
+  
+  getCurrentWeather(curWeatherURL);
+  getForecast(forecastURL);
 }

@@ -68,6 +68,10 @@ header {
   cursor: pointer;
 }
 
+.searched-cities:active {
+  background-color: lightskyblue;
+}
+
 .display {
   flex-basis: 65%;
   height: 70vh;
